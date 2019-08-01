@@ -15,5 +15,6 @@ services:
       dockerfile: "build/package/Dockerfile"
       target: builder
     entrypoint: 'go test ./... -coverpkg=./... -coverprofile=coverage.out'
+
 networks: 
   shared:
