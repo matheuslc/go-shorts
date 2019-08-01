@@ -9,5 +9,11 @@ services:
     entrypoint: "./main"
     networks:
       - shared
+  test:
+    build:
+      context: .
+      dockerfile: "build/package/Dockerfile"
+      target: builder
+    entrypoint: 'go test ./... -coverpkg=./... -coverprofile=coverage.out'
 networks: 
   shared:
