@@ -1,0 +1,13 @@
+version: "3.4"
+services:
+  go-shorts:
+    build:
+      context: .
+      dockerfile: "build/package/Dockerfile"
+    ports:
+      - "3000:3000"
+    entrypoint: "./main"
+    networks:
+      - shared
+networks: 
+  shared:
