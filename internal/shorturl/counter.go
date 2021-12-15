@@ -1,16 +1,17 @@
 package shorturl
 
-import "github.com/go-redis/redis/v8"
+import (
+	"context"
+
+	"github.com/go-redis/redis/v8"
+)
 
 type CounterRepository interface {
-	Next() (int32, error)
+	Next(ctx context.Context) (int64, error)
 }
 
 type RedisCounterRepository struct {
 	client *redis.Client
-}
-
-type Counter struct {
 }
 
 func NewRedisRepository() (RedisCounterRepository, error) {
@@ -23,4 +24,14 @@ func NewRedisRepository() (RedisCounterRepository, error) {
 	return RedisCounterRepository{
 		client,
 	}, nil
+}
+
+func (repo RedisCounterRepository) Next(ctx context.Context) (int64, error) {
+	next, err := repo.client.Incr(ctx, "counter").Result()
+
+	if err != nil {
+		return -1, err
+	}
+
+	return next, nil
 }
