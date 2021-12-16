@@ -5,16 +5,31 @@ services:
       context: .
       dockerfile: "build/package/Dockerfile"
     ports:
-      - "3000:3000"
+      - '3000:3000'
     entrypoint: "./main"
+    depends_on:
+      - redis
     networks:
       - shared
+
+  redis:
+    image: redis:6-alpine
+    ports: 
+      - '6379:6379'
+    command: redis-server --requirepass devpassword
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - shared
+  
   test:
     build:
       context: .
       dockerfile: "build/package/Dockerfile"
       target: builder
     entrypoint: 'go test ./... -coverpkg=./... -coverprofile=coverage.out'
+    
 
 networks: 
   shared:
