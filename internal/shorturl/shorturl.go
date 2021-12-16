@@ -3,25 +3,35 @@ package shorturl
 import (
 	"context"
 	"math/big"
+	"net/url"
 )
 
+type ShortIntent struct {
+	url *url.URL
+}
+
 type Shortener interface {
-	Alias() (string, error)
+	Run(intent ShortIntent) (string, error)
 }
 
 type ShortenerService struct {
-	repository CounterRepository
+	CounterRepository
+	WriteRepository
 }
 
-func (service ShortenerService) Alias() (string, error) {
+func (service ShortenerService) Run(intent ShortIntent) (string, error) {
 	ctx := context.Background()
-	nextCounter, err := service.repository.Next(ctx)
-
+	nextCounter, err := service.CounterRepository.Next(ctx)
 	if err != nil {
 		return "", nil
 	}
 
-	return base62(nextCounter), nil
+	save, err := service.WriteRepository.Create(ctx, intent.url, base62(nextCounter))
+	if err != nil {
+		return "", nil
+	}
+
+	return save, nil
 }
 
 func base62(counter int64) string {

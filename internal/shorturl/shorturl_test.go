@@ -2,6 +2,7 @@ package shorturl
 
 import (
 	"context"
+	"net/url"
 	"testing"
 )
 
@@ -14,12 +15,22 @@ func (repo FakeRepo) Next(ctx context.Context) (int64, error) {
 	return base10, nil
 }
 
+func (repo FakeRepo) Create(ctx context.Context, url *url.URL, alias string) (string, error) {
+	return expectedBase62, nil
+}
+
 func TestShortUrl(t *testing.T) {
 	service := ShortenerService{
-		repository: FakeRepo{},
+		CounterRepository: FakeRepo{},
+		WriteRepository:   FakeRepo{},
 	}
 
-	shortUrl, _ := service.Alias()
+	url, _ := url.Parse("http://foo.bar")
+	intent := ShortIntent{
+		url: url,
+	}
+
+	shortUrl, _ := service.Run(intent)
 
 	if shortUrl != expectedBase62 {
 		t.Errorf("Expected string %s, got %s", expectedBase62, shortUrl)
