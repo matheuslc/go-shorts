@@ -21,7 +21,7 @@ type ShortenerService struct {
 
 func (service ShortenerService) Run(intent ShortIntent) (string, error) {
 	ctx := context.Background()
-	nextCounter, err := service.CounterRepository.Next(ctx)
+	nextCounter, err := service.CounterRepository.NextPosition(ctx)
 	if err != nil {
 		return "", nil
 	}

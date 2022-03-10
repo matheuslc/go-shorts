@@ -5,10 +5,11 @@ import (
 	"net/url"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/matheuslc/go-shorts/config"
 )
 
 type CounterRepository interface {
-	Next(ctx context.Context) (int64, error)
+	NextPosition(ctx context.Context) (int64, error)
 }
 
 type WriteRepository interface {
@@ -23,11 +24,11 @@ type RedisRepository struct {
 	client *redis.Client
 }
 
-func NewRedisRepository() (RedisRepository, error) {
+func NewRedisRepository(cfg config.RedisOptions) (RedisRepository, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "",
-		Password: "",
-		DB:       0,
+		Addr:     cfg.RedisAddress,
+		Password: cfg.RedisPassword,
+		DB:       cfg.Database,
 	})
 
 	return RedisRepository{
@@ -35,7 +36,7 @@ func NewRedisRepository() (RedisRepository, error) {
 	}, nil
 }
 
-func (repo RedisRepository) Next(ctx context.Context) (int64, error) {
+func (repo RedisRepository) NextPosition(ctx context.Context) (int64, error) {
 	next, err := repo.client.Incr(ctx, "counter").Result()
 
 	if err != nil {
