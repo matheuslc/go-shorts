@@ -7,6 +7,10 @@ services:
     ports:
       - '3000:3000'
     entrypoint: "./main"
+    environment:
+      - REDIS_ADDRESS=redis
+      - REDIS_PASSWORD=devpassword
+      - REDIS_DATABASE=0
     depends_on:
       - redis
     networks:
@@ -17,9 +21,6 @@ services:
     ports: 
       - '6379:6379'
     command: redis-server --requirepass devpassword
-    volumes:
-      - $PWD/redis-data:/var/lib/redis
-      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       - shared
   
