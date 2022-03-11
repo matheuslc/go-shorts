@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 	"testing"
 
@@ -35,7 +36,8 @@ func TestMain(m *testing.M) {
 			Addr: fmt.Sprintf("localhost:%s", resource.GetPort("6379/tcp")),
 		})
 
-		m.Run()
+		result := m.Run()
+		os.Exit(result)
 
 		return db.Ping(context.Background()).Err()
 	}); err != nil {
