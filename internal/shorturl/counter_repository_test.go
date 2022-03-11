@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 	"testing"
 
 	"github.com/go-redis/redis/v8"
@@ -34,7 +35,9 @@ func TestMain(m *testing.M) {
 			Addr: fmt.Sprintf("localhost:%s", resource.GetPort("6379/tcp")),
 		})
 
-		return nil
+		m.Run()
+
+		return db.Ping(context.Background()).Err()
 	}); err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
@@ -45,14 +48,36 @@ func TestMain(m *testing.M) {
 	}
 }
 
-func TestNextPosition(t *testing.T) {
+func TestNextPositionConcurrent(t *testing.T) {
 	repo := RedisRepository{
 		client: db,
 	}
 
-	result, _ := repo.NextPosition(context.Background())
+	var wg sync.WaitGroup
+	var first int64
+	var second int64
+	var third int64
 
-	if result != 1 {
-		t.Errorf("Expected string %d, got %d", 1, result)
+	wg.Add(3)
+
+	go func() {
+		first, _ = repo.NextPosition(context.Background())
+		wg.Done()
+	}()
+
+	go func() {
+		second, _ = repo.NextPosition(context.Background())
+		wg.Done()
+	}()
+
+	go func() {
+		third, _ = repo.NextPosition(context.Background())
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	if first == second || first == third {
+		t.Errorf("Orders of counter wasnt the expect. Expected: 1, 2 and 3. Got: %d, %d and %d", &first, &second, &third)
 	}
 }

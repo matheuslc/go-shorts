@@ -2,7 +2,6 @@ package shorturl
 
 import (
 	"context"
-	"net/url"
 
 	redis "github.com/go-redis/redis/v8"
 	"github.com/matheuslc/go-shorts/config"
@@ -10,14 +9,6 @@ import (
 
 type CounterRepository interface {
 	NextPosition(ctx context.Context) (int64, error)
-}
-
-type WriteRepository interface {
-	Create(ctx context.Context, url *url.URL, alias string) (string, error)
-}
-
-type ReadRepository interface {
-	Find(ctx context.Context, alias string) (string, error)
 }
 
 type RedisRepository struct {
@@ -44,22 +35,4 @@ func (repo RedisRepository) NextPosition(ctx context.Context) (int64, error) {
 	}
 
 	return next, nil
-}
-
-func (repo RedisRepository) Create(ctx context.Context, url *url.URL, alias string) (string, error) {
-	_, err := repo.client.Set(ctx, alias, url.String(), 0).Result()
-	if err != nil {
-		return "", err
-	}
-
-	return alias, nil
-}
-
-func (repo RedisRepository) Find(ctx context.Context, alias string) (string, error) {
-	result, err := repo.client.Get(ctx, alias).Result()
-	if err != nil {
-		return "", err
-	}
-
-	return result, nil
 }

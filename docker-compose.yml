@@ -29,7 +29,7 @@ services:
       context: .
       dockerfile: "build/package/Dockerfile"
       target: builder
-    entrypoint: 'go test ./... -coverpkg=./... -coverprofile=coverage.out'
+    entrypoint: 'go test -race ./... -coverpkg=./... -coverprofile=coverage.out'
     
 
 networks: 
