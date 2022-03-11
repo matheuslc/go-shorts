@@ -1,11 +1,12 @@
-build:
-	docker-compose build
-
-start:
-	docker-compose up
+all: clean get-deps build test
 
 test:
-	docker-compose run --rm test
+	mkdir -p bin
+	go test -v -short -coverprofile=bin/cov.out ./...
+	go tool cover -func=bin/cov.out
 
-test-file:
-	docker-compose run --rm test go test $@
+clean:
+	rm -rf ./bin
+
+start-sonar:
+	docker run --name sonarqube -p 9000:9000 sonarqube
